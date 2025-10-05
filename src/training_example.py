@@ -3,14 +3,14 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from fla.models.transformer.modeling_transformer import GLAModel
+from fla.models.transformer.modeling_transformer import TransformerForCausalLM
 
-from model_cfgs.transformer_cfg import gla_cfg as transformer_cfg
+from model_cfgs.transformer_cfg import aldo_cfg as transformer_cfg
 from data_gen import DataConfig, get_dataloaders
 from hack_utils import non_shifting_loss, compute_accuracy
 
 def train(
-    model: GLAModel,
+    model: TransformerForCausalLM,
     train_dl: DataLoader,
     optimizer: optim.Optimizer,
     max_epochs: int,
@@ -28,7 +28,7 @@ def train(
         print(f"Epoch {epoch}, Loss: {loss.item()}")
     return model
 
-def eval(model: GLAModel, test_dl: DataLoader):
+def eval(model: TransformerForCausalLM, test_dl: DataLoader):
     model.eval()
     all_logits = []
     all_targets = []
@@ -45,17 +45,17 @@ def eval(model: GLAModel, test_dl: DataLoader):
 
 if __name__ == "__main__":
     data_cfg = DataConfig(
-        num_train_examples=100_000,
-        num_test_examples=3_000,
-        input_seq_len=768,
-        vocab_size=769,
-        batch_size=512,
-        num_kv_pairs=160,
-        train_power_a=0.01,
-        test_power_a=0.01,
-        random_non_queries=False,
-        seed=37,
-    )
+      num_train_examples=100_000,
+      num_test_examples=3_000,
+      input_seq_len=64,
+      vocab_size=65,
+      batch_size=256,
+      num_kv_pairs=16,
+      train_power_a=0.01,
+      test_power_a=0.01,
+      random_non_queries=False,
+      seed=37,
+  )
     train_dl, test_dl = get_dataloaders(data_cfg)
 
     model_cfg = transformer_cfg
