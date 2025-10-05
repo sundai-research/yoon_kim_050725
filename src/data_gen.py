@@ -225,7 +225,7 @@ def get_dataloaders(cfg: DataConfig):
     # load the data if it exists
     import os
     if os.path.exists("data.pt"):
-        data = torch.load("data.pt")
+        data = torch.load("data.pt", weights_only=False)
     else:
         data = multiquery_ar(
             cfg.vocab_size,
