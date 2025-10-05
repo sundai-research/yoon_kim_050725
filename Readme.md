@@ -23,7 +23,7 @@ when connecting do these from the machine:
 touch ~/.no_auto_tmux
 ```
 
-create an ssh key in the machine to clone from github.
+create an ssh key in the machine to clone from github. (or just clone using https instead of ssh)
 ```shell
 ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N "" -C "root@$(hostname)"
 ```
@@ -51,8 +51,8 @@ source .venv/bin/activate
 
 clone the hack repo:
 ```shell
-git clone <some repo I'll share later>
-cd <repo name>
+git clone https://github.com/sundai-research/yoon_kim_050725.git
+cd yoon_kim_050725
 ```
 
 install dependencies:
