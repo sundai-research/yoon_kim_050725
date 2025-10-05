@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from fla.models.transformer.modeling_transformer import TransformerForCausalLM
 from fla.models.gla.modeling_gla import GLAForCausalLM
 
-from model_cfgs.transformer_cfg import aldo_cfg as transformer_cfg
+from model_cfgs.transformer_cfg import gla_cfg as transformer_cfg
 from data_gen import DataConfig, get_dataloaders
 from hack_utils import non_shifting_loss, compute_accuracy
 
