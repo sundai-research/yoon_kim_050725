@@ -23,6 +23,7 @@ class DataConfig:
     test_power_a: float=0.01
     random_non_queries: bool=False,
     seed: int=0
+    cache_path: str = "data.pt"
 
 def multiquery_ar(
     vocab_size: int=8_192,
@@ -224,8 +225,8 @@ def _mqar(
 def get_dataloaders(cfg: DataConfig):
     # load the data if it exists
     import os
-    if os.path.exists("data.pt"):
-        data = torch.load("data.pt", weights_only=False)
+    if os.path.exists(cfg.cache_path):
+        data = torch.load(cfg.cache_path, weights_only=False)
     else:
         data = multiquery_ar(
             cfg.vocab_size,
@@ -238,7 +239,7 @@ def get_dataloaders(cfg: DataConfig):
             cfg.random_non_queries,
             cfg.seed
         )
-        torch.save(data, "data.pt")
+        torch.save(data, cfg.cache_path)
 
     # cache the data
     train_dl = DataLoader(
