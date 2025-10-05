@@ -3,14 +3,14 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from fla.models.transformer.modeling_transformer import TransformerForCausalLM
+from fla.models.transformer.modeling_transformer import GLAModel
 
-from model_cfgs.transformer_cfg import cfg as transformer_cfg
+from model_cfgs.transformer_cfg import gla_cfg as transformer_cfg
 from data_gen import DataConfig, get_dataloaders
 from hack_utils import non_shifting_loss, compute_accuracy
 
 def train(
-    model: TransformerForCausalLM,
+    model: GLAModel,
     train_dl: DataLoader,
     optimizer: optim.Optimizer,
     max_epochs: int,
@@ -28,7 +28,7 @@ def train(
         print(f"Epoch {epoch}, Loss: {loss.item()}")
     return model
 
-def eval(model: TransformerForCausalLM, test_dl: DataLoader):
+def eval(model: GLAModel, test_dl: DataLoader):
     model.eval()
     all_logits = []
     all_targets = []

@@ -1,4 +1,5 @@
 from fla.models.transformer.configuration_transformer import TransformerConfig
+from fla.models.gla.configuration_gla import GLAConfig
 
 cfg = TransformerConfig(
     # core architecture
@@ -30,4 +31,13 @@ cfg = TransformerConfig(
     # runtime semantics
     use_cache=False,
     tie_word_embeddings=False,
+)
+
+gla_cfg = GLAConfig(
+    vocab_size=769,
+    hidden_size=256,
+    num_hidden_layers=2,
+    num_heads=1,
+    num_kv_heads=None,
+    max_position_embeddings=1024,
 )
