@@ -65,11 +65,15 @@ aldo_cfg = TransformerConfig(
     tie_word_embeddings=False,
 )
 
-gla_cfg = GLAConfig(
-    vocab_size=65,
-    hidden_size=256,
+
+def get_gla_cfg(kv: int, hidden_size: int, num_hidden_layers: int, num_heads: int):
+  return GLAConfig(
+    vocab_size=4 * kv + 1,
+    hidden_size=hidden_size,
     num_hidden_layers=2,
-    num_heads=1,
+    num_heads=num_heads,
     num_kv_heads=None,
     max_position_embeddings=1024,
-)
+    intermediate_size=hidden_size * 4
+  )
+

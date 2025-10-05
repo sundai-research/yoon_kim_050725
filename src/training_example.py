@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from fla.models.transformer.modeling_transformer import TransformerForCausalLM
 from fla.models.gla.modeling_gla import GLAForCausalLM
 
-from model_cfgs.transformer_cfg import gla_cfg as transformer_cfg
+from model_cfgs.transformer_cfg import get_gla_cfg
 from data_gen import DataConfig, get_dataloaders
 from hack_utils import non_shifting_loss, compute_accuracy
 
@@ -45,7 +45,7 @@ def eval(model: GLAForCausalLM, test_dl: DataLoader):
     return compute_accuracy(all_logits, all_targets)
 
 if __name__ == "__main__":
-  kv = 16 # kv_options = (16, 64, 256, 512
+  kv = 64 # kv_options = (16, 64, 256, 512
   data_cfg = DataConfig(
         num_train_examples=100_000,
         num_test_examples=3_000,
@@ -57,19 +57,19 @@ if __name__ == "__main__":
         test_power_a=0.01,
         random_non_queries=False,
         seed=37,
-    )
-    train_dl, test_dl = get_dataloaders(data_cfg)
+  )
+  train_dl, test_dl = get_dataloaders(data_cfg)
 
-    model_cfg = transformer_cfg
-    model = GLAForCausalLM(model_cfg).to(torch.device("cuda:0")).to(torch.bfloat16)
-    torch.compile(model)
+  model_cfg = get_gla_cfg(kv, 1024, 2, 1)
+  model = GLAForCausalLM(model_cfg).to(torch.device("cuda:0")).to(torch.bfloat16)
+  torch.compile(model)
 
-    optimizer = optim.AdamW(model.parameters(), 
-                            lr=1e-4, 
-                            weight_decay=1e-6)
+  optimizer = optim.AdamW(model.parameters(), 
+                          lr=1e-4, 
+                          weight_decay=1e-6)
 
-    # from ipdb import set_trace; set_trace()
-    model = train(model, train_dl, optimizer, 30)
-    accuracy = eval(model, test_dl)
-    print(f"Accuracy: {accuracy}")
-    # from ipdb import set_trace; set_trace()
+  # from ipdb import set_trace; set_trace()
+  model = train(model, train_dl, optimizer, 30)
+  accuracy = eval(model, test_dl)
+  print(f"Accuracy: {accuracy}")
+  # from ipdb import set_trace; set_trace()
