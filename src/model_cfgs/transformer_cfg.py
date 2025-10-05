@@ -1,5 +1,6 @@
 from fla.models.transformer.configuration_transformer import TransformerConfig
 
+
 cfg = TransformerConfig(
     # core architecture
     vocab_size=769,

@@ -23,6 +23,7 @@ class DataConfig:
     test_power_a: float=0.01
     random_non_queries: bool=False,
     seed: int=0
+    cache_path: str = "data.pt"
 
 def multiquery_ar(
     vocab_size: int=8_192,
@@ -222,17 +223,25 @@ def _mqar(
     return inputs, labels
 
 def get_dataloaders(cfg: DataConfig):
-    data = multiquery_ar(
-        cfg.vocab_size,
-        cfg.num_train_examples,
-        cfg.num_test_examples,
-        cfg.input_seq_len,
-        cfg.num_kv_pairs,
-        cfg.train_power_a,
-        cfg.test_power_a,
-        cfg.random_non_queries,
-        cfg.seed
-    )
+    # load the data if it exists
+    import os
+    if os.path.exists(cfg.cache_path):
+        data = torch.load(cfg.cache_path, weights_only=False)
+    else:
+        data = multiquery_ar(
+            cfg.vocab_size,
+            cfg.num_train_examples,
+            cfg.num_test_examples,
+            cfg.input_seq_len,
+            cfg.num_kv_pairs,
+            cfg.train_power_a,
+            cfg.test_power_a,
+            cfg.random_non_queries,
+            cfg.seed
+        )
+        torch.save(data, cfg.cache_path)
+
+    # cache the data
     train_dl = DataLoader(
         TensorDataset(data.train_inputs, data.train_labels),
         batch_size=cfg.batch_size, 
