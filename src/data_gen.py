@@ -222,17 +222,25 @@ def _mqar(
     return inputs, labels
 
 def get_dataloaders(cfg: DataConfig):
-    data = multiquery_ar(
-        cfg.vocab_size,
-        cfg.num_train_examples,
-        cfg.num_test_examples,
-        cfg.input_seq_len,
-        cfg.num_kv_pairs,
-        cfg.train_power_a,
-        cfg.test_power_a,
-        cfg.random_non_queries,
-        cfg.seed
-    )
+    # load the data if it exists
+    import os
+    if os.path.exists("data.pt"):
+        data = torch.load("data.pt")
+    else:
+        data = multiquery_ar(
+            cfg.vocab_size,
+            cfg.num_train_examples,
+            cfg.num_test_examples,
+            cfg.input_seq_len,
+            cfg.num_kv_pairs,
+            cfg.train_power_a,
+            cfg.test_power_a,
+            cfg.random_non_queries,
+            cfg.seed
+        )
+        torch.save(data, "data.pt")
+
+    # cache the data
     train_dl = DataLoader(
         TensorDataset(data.train_inputs, data.train_labels),
         batch_size=cfg.batch_size, 
