@@ -10,7 +10,7 @@ from data_gen import DataConfig, get_dataloaders
 from hack_utils import non_shifting_loss, compute_accuracy
 
 def train(
-    model: TransformerForCausalLM,
+    model: GLAForCausalLM,
     train_dl: DataLoader,
     optimizer: optim.Optimizer,
     max_epochs: int,
@@ -28,7 +28,7 @@ def train(
         print(f"Epoch {epoch}, Loss: {loss.item()}")
     return model
 
-def eval(model: TransformerForCausalLM, test_dl: DataLoader):
+def eval(model: GLAForCausalLM, test_dl: DataLoader):
     model.eval()
     all_logits = []
     all_targets = []
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     train_dl, test_dl = get_dataloaders(data_cfg)
 
     model_cfg = transformer_cfg
-    model = TransformerForCausalLM(model_cfg).to(torch.device("cuda:0")).to(torch.bfloat16)
+    model = GLAForCausalLM(model_cfg).to(torch.device("cuda:0")).to(torch.bfloat16)
     torch.compile(model)
 
     optimizer = optim.AdamW(model.parameters(), 

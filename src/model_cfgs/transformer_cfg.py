@@ -66,7 +66,7 @@ aldo_cfg = TransformerConfig(
 )
 
 gla_cfg = GLAConfig(
-    vocab_size=769,
+    vocab_size=65,
     hidden_size=256,
     num_hidden_layers=2,
     num_heads=1,
