@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from fla.models.transformer.configuration_transformer import TransformerConfig
 from fla.models.transformer.modeling_transformer import TransformerForCausalLM
 
 from model_cfgs.transformer_cfg import cfg as transformer_cfg
@@ -44,18 +45,52 @@ def eval(model: TransformerForCausalLM, test_dl: DataLoader):
     return compute_accuracy(all_logits, all_targets)
 
 if __name__ == "__main__":
+
     data_cfg = DataConfig(
         num_train_examples=100_000,
         num_test_examples=3_000,
-        input_seq_len=768,
-        vocab_size=769,
-        batch_size=512,
-        num_kv_pairs=160,
+        input_seq_len=64,
+        vocab_size=65,
+        batch_size=256,
+        num_kv_pairs=16,
         train_power_a=0.01,
         test_power_a=0.01,
         random_non_queries=False,
         seed=37,
     )
+    transformer_cfg = TransformerConfig(
+        # core architecture
+        vocab_size=65,
+        hidden_size=256,
+        num_hidden_layers=2,
+        num_heads=1,
+        num_kv_heads=None,
+        max_position_embeddings=1024,
+        rope_theta=10000.0,
+        qkv_bias=False,
+        qk_norm=False,
+        window_size=None,
+
+        # MLP (SwiGLU)
+        hidden_ratio=4,
+        intermediate_size=1024,
+        hidden_act="swish",
+
+        # norms and numerics
+        norm_eps=1e-6,
+        elementwise_affine=True,
+        fuse_norm=False,
+        fuse_swiglu=False,
+        fuse_cross_entropy=False,
+        fuse_linear_cross_entropy=False,
+        use_l2warp=False,
+
+        # runtime semantics
+        use_cache=False,
+        tie_word_embeddings=False,
+    )
+
+
     train_dl, test_dl = get_dataloaders(data_cfg)
 
     model_cfg = transformer_cfg
