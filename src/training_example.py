@@ -45,18 +45,19 @@ def eval(model: GLAForCausalLM, test_dl: DataLoader):
     return compute_accuracy(all_logits, all_targets)
 
 if __name__ == "__main__":
-    data_cfg = DataConfig(
-      num_train_examples=100_000,
-      num_test_examples=3_000,
-      input_seq_len=64,
-      vocab_size=65,
-      batch_size=256,
-      num_kv_pairs=16,
-      train_power_a=0.01,
-      test_power_a=0.01,
-      random_non_queries=False,
-      seed=37,
-  )
+  kv = 16 # kv_options = (16, 64, 256, 512
+  data_cfg = DataConfig(
+        num_train_examples=100_000,
+        num_test_examples=3_000,
+        input_seq_len=4 * kv,
+        vocab_size=4 * kv + 1,
+        batch_size=256,
+        num_kv_pairs=kv,
+        train_power_a=0.01,
+        test_power_a=0.01,
+        random_non_queries=False,
+        seed=37,
+    )
     train_dl, test_dl = get_dataloaders(data_cfg)
 
     model_cfg = transformer_cfg
