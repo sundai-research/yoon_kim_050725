@@ -3,6 +3,10 @@ from tqdm import tqdm
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
+import hashlib
+import pickle
+import os
+from pathlib import Path
 
 @dataclass
 class Data:
@@ -34,6 +38,7 @@ def multiquery_ar(
     test_power_a: float=0.01,
     random_non_queries: bool=True,
     seed: int=0,
+    use_cache: bool=True,
 ) -> Data:
     """
     Generate synthetic sequences for the multi-query associative recall (MQAR) task.
@@ -92,6 +97,8 @@ def multiquery_ar(
         random_non_queries (bool): If True, replace filler zeros with random values sampled
             from the value vocabulary. Default: True.
         seed (int): Base RNG seed. The test set uses `seed + 10`. Default: 0.
+        use_cache (bool): If True, cache generated data to /tmp and reuse on subsequent calls
+            with identical arguments. Default: True.
 
     Returns:
         Data: Dataclass with fields:
@@ -104,6 +111,31 @@ def multiquery_ar(
     - A simple overlap check prints a warning if >0.1% of test sequences also appear in the
       training set.
     """
+    
+    # Create cache key from all arguments
+    if use_cache:
+        cache_key = {
+            'vocab_size': vocab_size,
+            'num_train_examples': num_train_examples,
+            'num_test_examples': num_test_examples,
+            'input_seq_len': input_seq_len,
+            'num_kv_pairs': num_kv_pairs,
+            'train_power_a': train_power_a,
+            'test_power_a': test_power_a,
+            'random_non_queries': random_non_queries,
+            'seed': seed
+        }
+        
+        # Create hash of arguments
+        cache_str = str(sorted(cache_key.items()))
+        cache_hash = hashlib.md5(cache_str.encode()).hexdigest()
+        cache_path = Path(f"/tmp/mqar_cache_{cache_hash}.pkl")
+        
+        # Check if cache exists
+        if cache_path.exists():
+            print(f"Loading cached data from {cache_path}")
+            with open(cache_path, 'rb') as f:
+                return pickle.load(f)
 
     train_inputs, train_labels = _mqar(
         vocab_size=vocab_size,
@@ -140,12 +172,20 @@ def multiquery_ar(
             "WARNING: Potential data leakage detected. " 
             f"{frac_test_in_train: 0.2f} of test examples are in the train set."
         )
-    return Data(
+    data = Data(
         train_inputs=train_inputs,
         train_labels=train_labels,
         test_inputs=test_inputs,
         test_labels=test_labels,
     )
+    
+    # Save to cache if caching is enabled
+    if use_cache:
+        print(f"Saving data to cache: {cache_path}")
+        with open(cache_path, 'wb') as f:
+            pickle.dump(data, f)
+    
+    return data
 
 
 def _mqar(

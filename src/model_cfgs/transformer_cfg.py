@@ -4,7 +4,7 @@ cfg = TransformerConfig(
     # core architecture
     vocab_size=769,
     hidden_size=256,
-    num_hidden_layers=2,
+    num_hidden_layers=1,
     num_heads=1,
     num_kv_heads=None,
     max_position_embeddings=1024,

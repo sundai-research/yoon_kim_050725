@@ -164,6 +164,14 @@ class TransformerModel(TransformerPreTrainedModel):
         self.vocab_size = config.vocab_size
 
         self.embeddings = nn.Embedding(config.vocab_size, config.hidden_size, self.padding_idx)
+        # Simple convolutional stem applied to token embeddings
+        # Keeps sequence length and hidden size unchanged
+        self.conv_stem = nn.Conv1d(
+            in_channels=config.hidden_size,
+            out_channels=config.hidden_size,
+            kernel_size=3,
+            padding=1
+        )
         self.layers = nn.ModuleList([TransformerBlock(config, layer_idx) for layer_idx in range(config.num_hidden_layers)])
         self.norm = (RMSNorm if config.fuse_norm else nn.RMSNorm)(config.hidden_size, eps=config.norm_eps)
 
@@ -213,6 +221,10 @@ class TransformerModel(TransformerPreTrainedModel):
 
         # embed positions
         hidden_states = inputs_embeds
+        # Convolutional stem (residual): [B, S, H] -> [B, H, S] -> Conv1d -> [B, S, H]
+        conv_in = hidden_states.transpose(1, 2)
+        conv_out = self.conv_stem(conv_in).transpose(1, 2)
+        hidden_states = hidden_states + conv_out
 
         all_hidden_states = () if output_hidden_states else None
         all_attns = () if output_attentions else None
